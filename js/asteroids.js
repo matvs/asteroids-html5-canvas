@@ -44,13 +44,8 @@ var AsteroidsGame = {
     },
 
     onKeyDownHandler: function(e){
-        switch(e.keyCode){
-            case KEY_MAP.SPACE: {
-                e.preventDefault();
-                this.spaceShip.move()
-                break;
-            }
-        }
+        e.preventDefault();
+        this.spaceShip.move(e.keyCode);
     },
     
     onKeyUpHandler: function(e){
@@ -78,12 +73,45 @@ function SpaceShip(ctx){
     self.y = 0;
 
     self.draw = function(){
-        self.ctx.fillRect(self.x, self.y, 15, 15);
+        self.ctx.fillRect(self.x, self.y, 6, 6);
     },
 
-    self.move = function(){
-        self.x = Math.floor(Math.random()*200);
-        self.y = Math.ceil(Math.random()*200);
+    self.move = function(direction){
+       switch(direction){
+           case KEY_MAP.UP:{
+            moveUp();
+            break;
+           }
+           case KEY_MAP.DOWN:{
+            moveDown();
+            break;
+           }
+           case KEY_MAP.LEFT:{
+            moveLeft();
+            break;
+           }
+           case KEY_MAP.RIGHT:{
+            moveRight();
+            break;
+           }
+       }
+    }
+
+    var step = 10;
+    moveUp = function(){
+        self.y -= step;
+    }
+
+    moveDown = function(){
+        self.y += step;
+    }
+
+    moveLeft = function(){
+        self.x -= step;
+    }
+
+    moveRight = function(){
+        self.x += step;
     }
 }
 
