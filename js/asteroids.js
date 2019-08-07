@@ -49,7 +49,8 @@ var AsteroidsGame = {
     },
     
     onKeyUpHandler: function(e){
-
+        e.preventDefault();
+        this.spaceShip.stop(e.keyCode);
     },
 
     bindKeyEvents: function () {
@@ -68,6 +69,10 @@ function SpaceShip(ctx){
     var self = this;
 
     self.ctx = ctx;
+
+    self.state = {
+
+    }
     
     self.x = 0;
     self.y = 0;
@@ -76,6 +81,7 @@ function SpaceShip(ctx){
     var a = 10;
     var h = 20;
     self.draw = function(){
+        self.updateCoords();
         let ctx = self.ctx;
         ctx.save();
         let r = (1.0/8.0)*(a*a/h) + 0.5*h;
@@ -94,30 +100,81 @@ function SpaceShip(ctx){
     self.move = function(direction){
        switch(direction){
            case KEY_MAP.UP:{
-            moveUp();
+            self.state.goingUp = true;
             break;
            }
            case KEY_MAP.DOWN:{
-            moveDown();
+            self.state.goingDown = true;
             break;
            }
            case KEY_MAP.LEFT:{
-            moveLeft();
+            self.state.goingLeft = true;
             break;
            }
            case KEY_MAP.RIGHT:{
-            moveRight();
+            self.state.goingRight = true;
             break;
            }
            case KEY_MAP.c:{
-            rotateCounterClockWise();
+            self.state.rotatingClockWise = true;
             break;
            }
            case KEY_MAP.x:{
-            rotateClockWise();
+            self.state.rotatingCounterClockWise = true;
             break;
            }
        }
+    }
+
+
+    self.stop = function(direction){
+        switch(direction){
+            case KEY_MAP.UP:{
+             self.state.goingUp = false;
+             break;
+            }
+            case KEY_MAP.DOWN:{
+             self.state.goingDown = false;
+             break;
+            }
+            case KEY_MAP.LEFT:{
+             self.state.goingLeft = false;
+             break;
+            }
+            case KEY_MAP.RIGHT:{
+             self.state.goingRight = false;
+             break;
+            }
+            case KEY_MAP.c:{
+             self.state.rotatingClockWise = false;
+             break;
+            }
+            case KEY_MAP.x:{
+             self.state.rotatingCounterClockWise = false;
+             break;
+            }
+        }
+     }
+
+    self.updateCoords=function(){
+        if(self.state.goingUp){
+            moveUp();
+        }
+        if(self.state.goingDown){
+            moveDown()
+        }
+        if(self.state.goingLeft){
+            moveLeft()
+        }
+        if(self.state.goingRight){
+            moveRight()
+        }
+        if(self.state.rotatingClockWise){
+            rotateClockWise()
+        }
+        if(self.state.rotatingCounterClockWise){
+            rotateCounterClockWise();
+        }
     }
 
     rotateClockWise = function(){
