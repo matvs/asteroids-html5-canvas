@@ -2,7 +2,7 @@ var AsteroidsGame = {
     canvas: null,
     ctx: null,
     options: {},
-    intervalId: null,
+    requestId: null,
     defaultOptions: {
         canvasId: "canvas",
         fps: 60,
@@ -20,7 +20,7 @@ var AsteroidsGame = {
         this.options = Object.assign(this.defaultOptions, optionsArg);
         
         this.removeKeyEvents();
-        clearInterval(this.intervalId)
+        cancelAnimationFrame(this.requestId);
 
         this.canvas = document.getElementById(this.options.canvasId);
         if(!this.canvas || this.canvas.nodeName != "CANVAS"){
@@ -32,8 +32,7 @@ var AsteroidsGame = {
         this.ctx = this.canvas.getContext('2d');
         this.spaceShip = new SpaceShip(this.ctx);
 
-        //TODO: Probably should be changed to requestAnimationFrame
-        setInterval(this.draw, 1000/this.options.fps);
+        this.requestId = requestAnimationFrame(this.draw)
 
         this.bindKeyEvents()
     },
@@ -41,6 +40,7 @@ var AsteroidsGame = {
     draw: function(){
         this.ctx.clearRect(0,0,this.canvas.width, this.canvas.height);
         this.spaceShip.draw()
+        this.requestId = requestAnimationFrame(this.draw)
     },
 
     onKeyDownHandler: function(e){
