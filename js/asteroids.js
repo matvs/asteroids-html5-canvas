@@ -71,9 +71,24 @@ function SpaceShip(ctx){
     
     self.x = 0;
     self.y = 0;
+    self.angle = 0;
 
+    var a = 10;
+    var h = 20;
     self.draw = function(){
-        self.ctx.fillRect(self.x, self.y, 6, 6);
+        let ctx = self.ctx;
+        ctx.save();
+        let r = (1.0/8.0)*(a*a/h) + 0.5*h;
+        ctx.translate(self.x + 0.5 * a, self.y - (h-r));
+        ctx.rotate(self.angle);
+        ctx.translate(-(self.x + 0.5 * a), -(self.y - (h-r)));
+        ctx.beginPath();
+        ctx.moveTo(self.x, self.y);
+        ctx.lineTo(self.x + a, self.y);
+        ctx.lineTo(self.x + 0.5 * a, self.y - h);
+        ctx.lineTo(self.x, self.y);
+        ctx.stroke();
+        ctx.restore()
     },
 
     self.move = function(direction){
@@ -94,7 +109,23 @@ function SpaceShip(ctx){
             moveRight();
             break;
            }
+           case KEY_MAP.c:{
+            rotateCounterClockWise();
+            break;
+           }
+           case KEY_MAP.x:{
+            rotateClockWise();
+            break;
+           }
        }
+    }
+
+    rotateClockWise = function(){
+        self.angle += (Math.PI / 180) * 5;
+    }
+
+    rotateCounterClockWise = function(){
+        self.angle -= (Math.PI / 180) * 5;
     }
 
     var step = 10;
@@ -120,5 +151,7 @@ const KEY_MAP = {
     UP: 38,
     RIGHT: 39,
     DOWN: 40,
-    SPACE: 32
+    SPACE: 32,
+    x:88,
+    c:67
 } 
