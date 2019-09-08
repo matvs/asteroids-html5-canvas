@@ -8,7 +8,6 @@ var AsteroidsGame = {
         fps: 60,
     },
     spaceShip: null,
-    bullets: [],
 
     init: function () {
         this.onKeyDownHandler = this.onKeyDownHandler.bind(this);
@@ -32,7 +31,6 @@ var AsteroidsGame = {
 
         this.ctx = this.canvas.getContext('2d');
         this.spaceShip = new SpaceShip(this.ctx,this.canvas.width/2, this.canvas.height/2);
-        this.bullets = [];
 
         this.requestId = requestAnimationFrame(this.draw)
 
@@ -42,7 +40,7 @@ var AsteroidsGame = {
     draw: function () {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.spaceShip.draw()
-        for(let bullet of this.bullets){
+        for(let bullet of this.spaceShip.bullets){
             bullet.draw();
         }
         this.requestId = requestAnimationFrame(this.draw)
@@ -50,15 +48,12 @@ var AsteroidsGame = {
 
     onKeyDownHandler: function (e) {
         e.preventDefault();
-        this.spaceShip.start(e.keyCode, e.repeat);
-        if(e.keyCode == KEY_MAP.SPACE || e.keyCode == KEY_MAP.DOWN){
-            this.bullets.push(this.spaceShip.shoot())
-        }
+        this.spaceShip.handleKeyDown(e.keyCode, e.repeat);
     },
 
     onKeyUpHandler: function (e) {
         e.preventDefault();
-        this.spaceShip.stop(e.keyCode);
+        this.spaceShip.handleKeyUp(e.keyCode);
     },
 
     bindKeyEvents: function () {
@@ -82,17 +77,20 @@ function SpaceShip(ctx, x, y) {
 
     }
 
+    self.bullets = [];
+
     self.x = x || 0;
     self.y = y || 0;
     self.angle = 0;
     self.vAngle = (Math.PI / 2);
 
+    self.lastShooted = 0;
     var step = 1;
     var stepX = stepY = 0;
     var a = 10;
     var h = 20;
     self.draw = function () {
-        self.updateCoords();
+        self.update();
         let ctx = self.ctx;
         ctx.save();
         let r = (1.0 / 8.0) * (a * a / h) + 0.5 * h;
@@ -120,7 +118,7 @@ function SpaceShip(ctx, x, y) {
   
     }
 
-    self.start = function (direction, repeat) {
+    self.handleKeyDown = function (direction, repeat) {
         switch (direction) {
             case KEY_MAP.UP: {
                 self.state.moving = true;
@@ -139,11 +137,16 @@ function SpaceShip(ctx, x, y) {
                 self.state.rotatingClockWise = true;
                 break;
             }
+            case KEY_MAP.SPACE:
+            case KEY_MAP.DOWN: {
+                self.state.shooting = true;
+                break;
+            }
         }
     }
 
 
-    self.stop = function (direction) {
+    self.handleKeyUp = function (direction) {
         switch (direction) {
             case KEY_MAP.UP: {
                 //self.state.moving = false;
@@ -157,10 +160,15 @@ function SpaceShip(ctx, x, y) {
                 self.state.rotatingClockWise = false;
                 break;
             }
+            case KEY_MAP.SPACE:
+            case KEY_MAP.DOWN: {
+                self.state.shooting = false;
+                break;
+            }
         }
     }
 
-    self.updateCoords = function () {
+    self.update = function () {
         if (self.state.rotatingClockWise) {
             rotateClockWise()
         }
@@ -170,17 +178,21 @@ function SpaceShip(ctx, x, y) {
         if (self.state.moving) {
             move();
         }
+        if(self.state.shooting && new Date().getTime() - self.lastShooted >= 500){
+            self.shoot();
+        }
     }
     
     self.shoot = function(){
         //self.x + 0.5 * a, self.y - h
-        return new Bullet(self.ctx, {
+        let bullet = new Bullet(self.ctx, {
             x : self.x,
             y: self.y,
             a: a,
             h: h
         }, self.angle -  (Math.PI/2))
-
+        self.bullets.push(bullet);
+        self.lastShooted = new Date().getTime();
     }
 
     rotateClockWise = function () {
