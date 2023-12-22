@@ -85,10 +85,13 @@ function SpaceShip(ctx, x, y) {
     self.vAngle = (Math.PI / 2);
 
     self.lastShooted = 0;
-    var step = 1;
+    var step = 2;
     var stepX = stepY = 0;
     var a = 10;
     var h = 20;
+
+    var vectorX = 0;
+    var vectorY = 0;
     self.draw = function () {
         self.update();
         let ctx = self.ctx;
@@ -122,11 +125,8 @@ function SpaceShip(ctx, x, y) {
         switch (direction) {
             case KEY_MAP.UP: {
                 self.state.moving = true;
-                if (!repeat) {
-                    self.vAngle = self.angle + (Math.PI / 2);
-                    stepY = Math.sin(self.vAngle) * step;
-                    stepX = Math.cos(self.vAngle) * step
-                }
+                self.state.accelarating = true;
+                
                 break;
             }
             case KEY_MAP.LEFT: {
@@ -150,6 +150,7 @@ function SpaceShip(ctx, x, y) {
         switch (direction) {
             case KEY_MAP.UP: {
                 //self.state.moving = false;
+                self.state.accelarating = false;
                 break;
             }
             case KEY_MAP.LEFT: {
@@ -181,6 +182,23 @@ function SpaceShip(ctx, x, y) {
         if(self.state.shooting && new Date().getTime() - self.lastShooted >= 500){
             self.shoot();
         }
+        if(self.state.accelarating){
+            self.vAngle = self.angle + (Math.PI / 2);
+            vectorX += Math.cos(self.vAngle) * step
+            vectorY += Math.sin(self.vAngle) * step;
+            let vector = vectorX*vectorX + vectorY*vectorY;
+           // if( vector > step){
+             if(Math.abs(vectorX) > step || Math.abs(vectorY) > step){   
+              
+                vectorY = step * ((vectorY)/vector);
+                vectorX = step *  ((vectorX/vector));
+            }
+        
+            //self.log();
+            //console.log("ANGLE IS " + Math.asin(vectorY/vector)* 180 / Math.PI);
+            stepX = vectorX;
+            stepY = vectorY;
+        }
     }
     
     self.shoot = function(){
@@ -205,8 +223,22 @@ function SpaceShip(ctx, x, y) {
 
 
     move = function () {
+    
+         
         self.y -= stepY;
         self.x -= stepX
+        if(self.y < 0){
+            self.y = 600;
+        }
+        if(self.y > 600){
+            self.y = 0;
+        }
+        if(self.x < 0){
+            self.x = 600;
+        }
+        if(self.x > 600){
+            self.x = 0;
+        }
     }
 
     self.log = function(){
@@ -214,6 +246,7 @@ function SpaceShip(ctx, x, y) {
         console.log("x: " + self.x);
         console.log("y: " + self.y);
         console.log("angle (deg): " + self.angle * 180 / Math.PI);
+        console.log("vAngle (deg): " + self.vAngle * 180 / Math.PI);
         console.log("---------------------------------------------");
     }
 }
@@ -243,7 +276,7 @@ function Bullet(ctx, coords, angle){
     var startX = x + 0.5 * a;
     var startY = y - h;
     
-    var step = 2;
+    var step = 8;
     var stepY = Math.sin(self.angle) * step;
     var stepX = Math.cos(self.angle) * step
     self.state = {
